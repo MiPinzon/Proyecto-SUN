@@ -1,7 +1,7 @@
 import Graficador as graficar
 import os
 import FuncionesGraficas as graficos
-
+# En esta funcion se añande los estdiantes a la base de datos
 def AñadirEstudiante(lector,database):
     graficar.Simple()
     while True:
@@ -10,8 +10,8 @@ def AñadirEstudiante(lector,database):
             b = input("Digite el apellido del nuevo estudiante: ")
             c = input("Digite el ID del nuevo estudiante: ")
             d = int(input("Digite el codigo de la carrera del nuevo estudiante: "))
-            e = "Matriculado"
-            f = 0
+            e = input("Digite el estado del estudiante(Matriculado, Graduado, Perdida de cupo): ")
+            f = int(input("Digite el P.A.P.A del estudiante: "))
             nuevo_usuario = (a,b,c,d,e,f)
             lector.execute("INSERT INTO ESTUDIANTES(NOMBRE, APELLIDO, ID, CODPDE, ESTADO, PAPA) VALUES(?,?,?,?,?,?)",nuevo_usuario)
             database.commit()
@@ -19,7 +19,7 @@ def AñadirEstudiante(lector,database):
         except:
             print("Ocurrido un error, por favor digite denuevo.")
     os.system('cls')
-
+# En esta funcion se añande los profesores a la base de datos
 def AñadirProfesor(lector,database):
     graficar.Simple()
     while True:
@@ -31,16 +31,18 @@ def AñadirProfesor(lector,database):
             nuevo_docente = (a,b,c,d)
             lector.execute("INSERT INTO PROFESORES(NOMBRE, APELLIDO, ID, ESTADO) VALUES(?,?,?,?)",nuevo_docente)
             database.commit()
+            break
         except:
             print("Ocurrido un error, por favor digite denuevo.")
     os.system('cls')
-
+# En esta funcion se añande las materias a la base de datos
 def AñadirMateria(lector,database):
     graficar.Simple()
     while True:
         a = input("Digite el codigo de la nueva materia: ")
         b = input("Digite el nombre de la nueva materia: ")
-        c = input("Digite el codigo de la facultad a la que pertenece la materia:")
+        c = input("Digite el codigo de la facultad a la que pertenece la materia: ")
+        x = input("Digite el codigo del departamento que la dicta: ")
         d = int(input("Digite los creditos de la nueva materia: "))
         f = ""
         while True:
@@ -63,11 +65,11 @@ def AñadirMateria(lector,database):
                 else:
                     pass
         break
-    nueva_materia = (a,b,c,d,e,f)
-    lector.execute("INSERT INTO MATERIAS(CODIGO, NOMBRE, CODFACULTAD, CREDITOS, PREREQ, CODPREREQ) VALUES(?,?,?,?,?,?)",nueva_materia)
+    nueva_materia = (a,b,c,x,d,e,f)
+    lector.execute("INSERT INTO MATERIAS(CODIGO, NOMBRE, CODFACULTAD, CODDEPA, CREDITOS, PREREQ, CODPREREQ) VALUES(?,?,?,?,?,?,?)",nueva_materia)
     database.commit()
     os.system('cls')
-
+# Con esta funcion se le asignan las materias a los profesores
 def AsignarMaterias(lector,database):
     graficar.Simple()
     while True:
@@ -95,7 +97,7 @@ def AsignarMaterias(lector,database):
                     break
                 else:
                     while True:
-                        try:
+                        
                             lector.execute("SELECT NOMBRE FROM MATERIAS WHERE CODIGO = ?",(a,))
                             b = lector.fetchall()
                             b = ConvertirString(b)
@@ -106,23 +108,21 @@ def AsignarMaterias(lector,database):
                             d = lector.fetchall()
                             d = ConvertirString(d)
                             f = int(input("Digite la hora de inicio de la clase (24h): "))
-                            g = int(input("Digite la hora del final de la clase (24h): "))
+                            g = int(input("Digite la durancion de la clase: "))
                             h = input("Digite las iniciales de los dias de clase (L,M,C,J,V): ")
                             i = int(input("Digite el numero de cupos disponibles: "))
-                            j = int(input("Digite el numero del grupo: "))
                             lector.execute("SELECT * FROM MATERIASDOC WHERE ID = ? AND DIAS = ?",(e,h,))
-                            nueva_asignacion = (a,b,c,d,e,f,g,h,i,j)
+                            nueva_asignacion = (a,b,c,d,e,f,g,h,i)
                             lector.execute('''INSERT INTO MATERIASDOC(CODIGO, NOMBRE, NOMDOC, 
-                            APDOC, ID, HORARIOINIT, HORARIOEND, DIAS, 
-                            CUPOS, GRUPO) VALUES(?,?,?,?,?,?,?,?,?,?)''',nueva_asignacion)
+                            APDOC, ID, HORARIOINIT, HORASCLASE, DIAS, 
+                            CUPOS) VALUES(?,?,?,?,?,?,?,?,?)''',nueva_asignacion)
                             database.commit()
                             break
-                        except:
-                            print("Ocurrido un error, por favor digite denuevo")
+                        
                     break
             break
     os.system('cls')
-
+# Con esta funcion los estudiantes inscriben materias
 def InscribirMaterias(lector,database):
     graficar.Simple()
     while True:
@@ -146,7 +146,7 @@ def InscribirMaterias(lector,database):
                         Mostrar(lector,"ESTUDIANTES")
                 lector.execute("SELECT ESTADO FROM ESTUDIANTES WHERE ID = ?",(c,))
                 t = lector.fetchall()
-                t = ConvertirString(t)
+                t = ConvertirString(t)               
                 if(t != "Matriculado"):
                     input("El estudiante no esta en condicion de inscribir materias")
                     break
@@ -156,7 +156,7 @@ def InscribirMaterias(lector,database):
                 if (z != "0"): 
                     lector.execute("SELECT * FROM MATERIASEST WHERE CODIGO = ? AND IDEST = ? AND ESTATUS == 'Aprobado'",(z,c,))
                     y = lector.fetchall()
-                    y = ConvertirLista(y)
+                    y = ConvertirLista(y)                  
                     if (z != "0" and  z not in y):
                         input("El estudiante no cumple con el prerequisito solicitado")
                         break
@@ -173,63 +173,45 @@ def InscribirMaterias(lector,database):
                             d = ConvertirString(d)
                             lector.execute("SELECT APELLIDO FROM ESTUDIANTES WHERE ID = ?",(c,))
                             e = lector.fetchall()
-                            e = ConvertirString(e)
-                            lector.execute("SELECT GRUPO FROM MATERIASDOC CODIGO WHERE CODIGO = ?",(a,))
-                            f = lector.fetchall()
-                            f = ConvertirListaNum(f)
-                            for i in f:
-                                print(i,end=" ")
-                            print(" ")
-                            while True:
-                                try:
-                                    x = int(input("Seleccione el grupo deseado: "))
-                                    if (x not in f):
-                                        print("No existe el grupo deseado.")
-                                        if ("Y" == input("¿Desea ver las materias disponibles Y||N?: ")):
-                                            Mostrar(lector,"MATERIASDOC")
-                                    else:
-                                        f = x
-                                        break
-                                except:
-                                    ("Ha ocurrido un error, digite denuevo por favor")
-                            lector.execute("SELECT ID FROM MATERIASDOC WHERE GRUPO = ?",(f,))
+                            e = ConvertirString(e)                          
+                            lector.execute("SELECT ID FROM MATERIASDOC WHERE CODIGO = ?",(a,))
                             g = lector.fetchall()
                             g = ConvertirString(g)
-                            lector.execute("SELECT NOMDOC FROM MATERIASDOC WHERE GRUPO = ?",(f,))
+                            lector.execute("SELECT NOMDOC FROM MATERIASDOC WHERE CODIGO = ?",(a,))
                             h = lector.fetchall()
                             h = ConvertirString(h)
-                            lector.execute("SELECT APDOC FROM MATERIASDOC WHERE GRUPO = ?",(f,))
+                            lector.execute("SELECT APDOC FROM MATERIASDOC WHERE CODIGO = ?",(a,))
                             i = lector.fetchall()
                             i = ConvertirString(i)
-                            lector.execute("SELECT HORARIOINIT FROM MATERIASDOC WHERE GRUPO = ?",(f,))
+                            lector.execute("SELECT HORARIOINIT FROM MATERIASDOC WHERE CODIGO = ?",(a,))
                             j = lector.fetchall()
                             j = ConvertirNum(j)
-                            lector.execute("SELECT HORARIOEND FROM MATERIASDOC WHERE GRUPO = ?",(f,))
+                            lector.execute("SELECT HORASCLASE FROM MATERIASDOC WHERE CODIGO = ?",(a,))
                             k = lector.fetchall()
                             k = ConvertirNum(k)
-                            lector.execute("SELECT DIAS FROM MATERIASDOC WHERE GRUPO = ?",(f,))
+                            lector.execute("SELECT DIAS FROM MATERIASDOC WHERE CODIGO = ?",(a,))
                             l = lector.fetchall()
                             l = ConvertirString(l)
                             m = "Cursando"
                             n = 0
-                            nueva_asignacion = (a,b,c,d,e,f,g,h,i,j,k,l,m,n)
+                            nueva_asignacion = (a,b,c,d,e,g,h,i,j,k,l,m,n)
                             lector.execute('''INSERT INTO MATERIASEST(CODIGO, NOMBRE, IDEST, 
-                            NOMEST, APEST, GRUPO, IDDOC, 
+                            NOMEST, APEST,IDDOC, 
                             NOMDOC, APDOC, HORARIOINIT, 
-                            HORARIOEND, DIAS, ESTATUS, CALIFICACIÓN) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',nueva_asignacion)
-                            lector.execute("SELECT CUPOS FROM MATERIASDOC WHERE GRUPO = ?",(f,))
+                            HORASCLASE, DIAS, ESTATUS, CALIFICACIÓN) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',nueva_asignacion)
+                            lector.execute("SELECT CUPOS FROM MATERIASDOC WHERE ID = ?",(g,))
                             o = lector.fetchall()
                             o = ConvertirNum(o)
                             o = o-1
-                            lector.execute("UPDATE MATERIASDOC SET CUPOS = ? WHERE GRUPO = ?",(o,f,))
+                            lector.execute("UPDATE MATERIASDOC SET CUPOS = ? WHERE ID = ?",(o,g,))
                             database.commit()
                             break
                         except:
-                            print("Ocurrido un error, digite denuevo porfavor.")
+                            print("Ocurrido un error, digite denuevo porfavor.")                          
                     break
             break
     os.system('cls')
-
+# Funcion para cancelar materias
 def CancelarMaterias(lector,database):
     graficar.Simple()
     z = input("Digite el Id del estudiante: ")
@@ -260,7 +242,7 @@ def CancelarMaterias(lector,database):
                 print("Codigo no existente.")
         database.commit()
     os.system('cls')
-
+# Funcion para modificar un estudiante
 def ModificarEstudiante(lector,database):
     graficar.Simple()
     z = input("Digite el ID del estudiante que desee modificar: ")
@@ -305,7 +287,7 @@ def ModificarEstudiante(lector,database):
         pass
     database.commit()
     os.system('cls')
-    
+# Funcion para modificar un profesor    
 def ModificarProfesor(lector,database):
     graficar.Simple()
     z = input("Digite el ID del profesor que desee modificar: ")
@@ -350,7 +332,7 @@ def ModificarProfesor(lector,database):
         pass
     database.commit()
     os.system('cls')
-
+# Funcion para modificar una materia
 def ModificarMaterias(lector,database):
     graficar.Simple()
     z = input("Digite el codigo de la materia que desee modificar: ")
@@ -388,7 +370,7 @@ def ModificarMaterias(lector,database):
         pass
     database.commit()
     os.system('cls')
-
+# Funcion para eliminar un estudiante
 def EliminarEstudiante(lector,database):
     graficar.Simple()
     while True:
@@ -414,7 +396,7 @@ def EliminarEstudiante(lector,database):
             b = input("Escriba la palabra 'Eliminar' para confirmar su ocpion: ")
             if(a == "Y" and b == "Eliminar"):
                 lector.execute("DELETE FROM ESTUDIANTES WHERE ID = ? ",(z,))
-                lector.execute("DELETE FROM MATERIASEST WHIERE IDEST = ? ",(z,))
+                lector.execute("DELETE FROM MATERIASEST WHERE IDEST = ? ",(z,))
                 database.commit()
                 break
             else:
@@ -423,7 +405,7 @@ def EliminarEstudiante(lector,database):
         except:
             print("Ocurrido un error, por favor digite denuevo")
     os.system('cls')
-
+# Funcion para eliminar un profesor
 def EliminarProfesor(lector,database):
     graficar.Simple()
     while True:
@@ -450,7 +432,7 @@ def EliminarProfesor(lector,database):
             if(a == "Y" and b == "Eliminar"):
                 lector.execute("DELETE FROM PROFESORES WHERE ID = ? ",(z,))
                 lector.execute("DELETE FROM MATERIASDOC WHERE ID = ? ",(z,))
-                lector.execute("DELETE FROM MATERIASEST WHIERE IDDOC = ? ",(z,))
+                lector.execute("DELETE FROM MATERIASEST WHERE IDDOC = ? AND ESTATUS 'cursando' ",(z,))
                 database.commit()
                 break
             else:
@@ -459,7 +441,7 @@ def EliminarProfesor(lector,database):
         except:
             print("Ocurrido un error, por favor digite denuevo")
     os.system('cls')
-            
+# Funcion para asinar una nota a los estudiantes           
 def SubirCalificaciones(lector,database):
     graficar.Simple()
     z = input("Digite el Id del estudiante: ")
@@ -483,29 +465,26 @@ def SubirCalificaciones(lector,database):
         print(" ")
         y = input("Digite el codigo de la materia que desea calificar: ")
         while True:
-            try:
-                lector.execute("SELECT * FROM MATERIASEST WHERE IDEST = ? AND CODIGO = ?",(z,y,))
-                o = lector.fetchall()
-                x = 0
-                w = 14
-                k = 0
-                for i in range(len(y)):
-                    for j in o[i]:
-                        if (k == w):
-                            k = 0
-                            print("")
-                        print("|",end=" ")
-                        print(j,end=" ")
-                        print("|",end=" ")
-                        k = k + 1
-                a = int(input("Digite la calificacion de la materia."))
+            try:      
+                a = int(input("Digite la calificacion de la materia: "))
                 lector.execute("UPDATE MATERIASEST SET CALIFICACIÓN = ? WHERE IDEST = ? AND CODIGO = ?",(a,z,y,))
+                ''' if a>30:
+                    lector.execute("SELECT CODIGO FROM MATERIASEST WHERE CALIFICACIÓN = ?",(a,))
+                    b = lector.fetchall()
+                    b = ConvertirString(b)
+                    lector.execute("SELECT CODIGO FROM MATERIASEST WHERE CALIFICACIÓN = ?",(a,))
+                    c = lector.fetchall()
+                    c = ConvertirString(c)
+                    materias_aprobada = (b,c)
+                    lector.execute("INSERT INTO MATERIAAPRO (CODMATERIA, IDEST) VALUES = ?,?",materias_aprobada)
+                    database.commit()'''
                 break
             except:
                 print("Codigo no existente.")
+                break
         database.commit()
     os.system('cls')
-
+# Con esta funcion se calcula el PAPA
 def CalcularPAPA(lector,database):
     graficar.Simple()
     z = input("Digite el Id del estudiante: ")
@@ -530,7 +509,7 @@ def CalcularPAPA(lector,database):
     lector.execute("UPDATE ESTUDIANTES SET PAPA = ? WHERE ID = ?",(p,z,))
     database.commit()
     os.system('cls')
-
+# Con esta funcion mostramos lo que hay en la base de datos
 def Mostrar(lector,tabla):
     graficar.Simple()
     print("")
@@ -545,50 +524,66 @@ def Mostrar(lector,tabla):
         4.) PAPA
         ''')
         print("")
-        d = input("Digite el orden que desea: ")
+        d = int(input("Digite el orden que desea: "))
         if (d == 1):
             c = "NOMBRE"
+            graficos.ImprimirTabla(tabla)
+            lector.execute("SELECT * FROM ESTUDIANTES ORDER BY ?",(c,)) 
         if (d == 2):
             c = "APELLIDO"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT APELLIDO, NOMBRE, ID, CODPDE, ESTADO, PAPA FROM ESTUDIANTES") 
+            
         if (d == 3):
             c = "ID"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT ID, NOMBRE, APELLIDO, CODPDE, ESTADO, PAPA FROM ESTUDIANTES") 
         if (d == 4):
-            c = "PAPA"
-        graficos.ImprimirTabla(tabla)
-        lector.execute("SELECT * FROM ESTUDIANTES ORDER BY ?",(c,))
+            c = "PAPA" 
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT PAPA, NOMBRE, APELLIDO, ID, CODPDE, ESTADO FROM ESTUDIANTES") 
+    
     elif (tabla == "PROFESORES"):
-        b = 4
+        b = 4      
         print('''
         1.) Nombre
         2.) Apellido
         3.) ID
         ''')
         print("")
-        d = input("Digite el orden que desea:")
+        d = int(input("Digite el orden que desea:"))
         if (d == 1):
             c = "NOMBRE"
+            graficos.ImprimirTabla(tabla)
+            lector.execute("SELECT * FROM PROFESORES ORDER BY ?",(c,))
         if (d == 2):
             c = "APELLIDO"
+            graficos.ImprimirTabla(tabla)
+            lector.execute("SELECT APELLIDO, NOMBRE, ID, ESTADO FROM PROFESORES")
         if (d == 3):
             c = "ID"
-        graficos.ImprimirTabla(tabla)
-        lector.execute("SELECT * FROM PROFESORES ORDER BY ?",(c,))
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT ID, NOMBRE, APELLIDO, ESTADO FROM PROFESORES")
+
     elif (tabla == "MATERIAS"):
-        b = 6
+        b = 7
         print('''
         1.) Nombre
         2.) Codigo
         ''')
         print("")
-        d = input("Digite el orden que desea:")
+        d = int(input("Digite el orden que desea:"))
         if (d == 1):
             c = "NOMBRE"
+            graficos.ImprimirTabla(tabla)
+        lector.execute("SELECT * FROM MATERIAS ORDER BY ?",(c,))
         if (d == 2):
             c = "CODIGO"
-        graficos.ImprimirTabla(tabla)
-        lector.execute("SELECT * FROM MATERIAS ORDER BY ?",(c,))
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT CODIGO, NOMBRE, APELLIDO, CODFACULTAD, CODDEPA, CREDITOS, PREREQ, CODPREREQ FROM PROFESORES")
+      
     elif (tabla == "MATERIASDOC"):
-        b = 10
+        b = 9
         print('''
         1.) Nombre de materia
         2.) Codigo de materia
@@ -597,51 +592,68 @@ def Mostrar(lector,tabla):
         5.) Id de docente
         ''')
         print("")
-        d = input("Digite el orden que desea:")
+        d = int(input("Digite el orden que desea:"))
         if (d == 1):
             c = "NOMBRE"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT  NOMBRE, CODIGO, NOMDOC, APDOC, ID, HORARIOINIT, HORASCLASE, DIAS, CUPOS FROM MATERIASDOC")
         if (d == 2):
             c = "CODIGO"
+            graficos.ImprimirTabla(tabla)
+            lector.execute("SELECT CODIGO, NOMBRE, NOMDOC, APDOC, ID, HORARIOINIT, HORASCLASE, DIAS, CUPOS FROM MATERIASDOC")
         if (d == 3):
             c = "NOMDOC"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT NOMDOC, APDOC, CODIGO, NOMBRE, ID, HORARIOINIT, HORASCLASE, DIAS, CUPOS FROM MATERIASDOC")
         if (d == 4):
             c = "APDOC"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT APDOC, NOMDOC, CODIGO, NOMBRE, ID, HORARIOINIT, HORASCLASE, DIAS, CUPOS FROM MATERIASDOC")
         if (d == 5):
             c = "IDDOC"
-        graficos.ImprimirTabla(tabla)
-        lector.execute("SELECT * FROM MATERIASDOC ORDER BY ?",(c,))
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT ID, APDOC, NOMDOC, CODIGO, NOMBRE,  HORARIOINIT, HORASCLASE, DIAS, CUPOS FROM MATERIASDOC")
+        
     elif (tabla == "MATERIASEST"):
         b = 14
         print('''
-        1.) Nombre de materia
+        1.) Id estudiante
         2.) Codigo de materia
-        3.) Nombre de docente
-        4.) Apellido de doncente
-        5.) Nombre de estudiante
-        6.) Apellido de estudiante
-        7.) Id profesor
-        8.) Id estudiante
         ''')
         print("")
-        d = input("Digite el orden que desea:")
+        d = int(input("Digite el orden que desea:"))
         if (d == 1):
             c = "NOMBRE"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT  IDEST, CODIGO FROM  MATERIASEST")
         if (d == 2):
             c = "CODIGO"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT CODIGO, IDEST FROM  MATERIASEST")
         if (d == 3):
             c = "NOMDOC"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT NOMDOC, APDOC, IDDOC, NOMBRE, CODIGO, NOMEST, APEST, IDEST, HORARIOINIT, DIAS, ESTATUS, CALIFICACIÓN FROM  MATERIASEST")
         if (d == 4):
             c = "APDOC"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT APDOC, NOMDOC, IDDOC, NOMBRE, CODIGO, NOMEST, APEST, IDEST, HORARIOINIT, DIAS, ESTATUS, CALIFICACIÓN FROM  MATERIASEST")
         if (d == 5):
             c = "NOMEST"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT NOMEST, APEST, IDEST, NOMBRE, CODIGO, NOMDOC, APDOC, IDDOC, HORARIOINIT, DIAS, ESTATUS, CALIFICACIÓN FROM  MATERIASEST")
         if (d == 6):
             c = "APEST"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT APEST, NOMEST, NOMBRE, CODIGO, IDEST, IDDOC, NOMDOC, APDOC, HORARIOINIT, DIAS, ESTATUS, CALIFICACIÓN FROM  MATERIASEST")
         if (d == 7):
             c = "IDDOC"
+            graficos.ImprimirTabla2(tabla)
+            lector.execute("SELECT  IDDOC, NOMDOC, NOMBRE, CODIGO, IDEST, NOMEST, APEST, APDOC, HORARIOINIT, DIAS, ESTATUS, CALIFICACIÓN FROM  MATERIASEST")
         if (d == 8):
             c = "IDEST"
-        graficos.ImprimirTabla(tabla)
-        lector.execute("SELECT * FROM MATERIASEST ORDER BY ?",(c,))
+            graficos.ImprimirTabla(tabla)
+            lector.execute("SELECT IDEST, NOMEST, APEST, NOMBRE, CODIGO, IDDOC, NOMDOC, APDOC, HORARIOINIT, DIAS, ESTATUS, CALIFICACIÓN FROM  MATERIASEST")
     a = lector.fetchall()
     k = 0
     for i in range(len(a)):

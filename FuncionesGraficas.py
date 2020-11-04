@@ -149,7 +149,7 @@ def MenuBuscar():
 
 def ImprimirTabla(tabla):
     if (tabla == "ESTUDIANTES"):
-        print("Nombres"," ","Apellidos"," ","ID"," ","Codigo de facultad"," ","Estado"," "," P.A.P.A.")
+        print("Nombres"," ","Apellidos"," ","ID"," ","Codigo Plan de estudios"," ","Estado"," "," P.A.P.A.")
         print("")
         print("")
     if (tabla == "PROFESORES"):
@@ -157,17 +157,37 @@ def ImprimirTabla(tabla):
         print("")
         print("")
     if (tabla == "MATERIAS"):
-        print("Codigo"," ","Nombre"," ","Codigo de Facultad"," ","Creditos"," "," Prerequisito"," ","Codigo del prerequisito")
+        print("Codigo"," ","Nombre"," ","Codigo de Facultad"," ","Codigo plan de estudio"," ","Creditos"," "," Prerequisito"," ","Codigo del prerequisito")
         print("")
         print("")
     if (tabla == "MATERIASDOC"):
-        print("Codigo"," ","Nombre"," ","Nombre Docente"," ","Apellido Docente"," ","ID"," "," Hora de inicio"," ","Hora final"," ","Dias"," ","Cupos"," ","Grupo")
+        print("Codigo"," ","Nombre"," ","Nombre Docente"," ","Apellido Docente"," ","ID"," "," Hora de inicio"," ","Horas clase"," ","Dias"," ","Cupos"," ","Grupo")
         print("")
         print("")
     if (tabla == "MATERIASEST"):
         print("Codigo"," ","Nombre"," ","ID Estudiante"," ","Nombre Estudiante"," ","Apellido Estudiante"," "," Grupo"," ","ID Profesor"," "," Nombre Profesor"," ","Apellido Profesor"," ","Hora final"," ","Dias"," ","Estatus"," ","Calificación")
         print("")
-        print("")        
+        print("")    
+
+
+def ImprimirTabla2(tabla): 
+    if (tabla == "ESTUDIANTES"):
+        print("")
+        print("")
+    if (tabla == "PROFESORES"):
+        print("")
+        print("")
+    if (tabla == "MATERIAS"):
+        print("")
+        print("")
+    if (tabla == "MATERIASDOC"):
+        print("")
+        print("")
+    if (tabla == "MATERIASEST"):
+        print("Codigo materia"," ","id estudiante",)
+        print("")
+        print("")
+
 
 def Salir():
     condition = True
